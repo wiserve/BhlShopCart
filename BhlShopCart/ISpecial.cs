@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace BhlShopCart
 {
-    public interface IShopCart
+    public interface ISpecial
     {
-        Decimal Price(string[] items, IPriceList priceList);
+        int Quantity { get; set; }
+        int For { get; set; }
     }
 }
