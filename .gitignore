@@ -1,0 +1,10 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/BhlShopCart/obj/Debug
+/BhlShopCart/.vs/BhlShopCart/v15
+/.vs/BhlShopCart/v15
+/.vs/slnx.sqlite
+/.vs/VSWorkspaceState.json
+/BhlShopCart/bin/Debug
