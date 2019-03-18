@@ -10,5 +10,6 @@ namespace BhlShopCart
     {
         public string Name { get; set; }
         public Decimal Price { get; set; }
+        public string SpecialCode { get; set; }
     }
 }

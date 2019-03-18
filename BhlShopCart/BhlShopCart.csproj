@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CombinedPriceList.cs" />
     <Compile Include="IItem.cs" />
     <Compile Include="IPriceList.cs" />
     <Compile Include="IShopCart.cs" />

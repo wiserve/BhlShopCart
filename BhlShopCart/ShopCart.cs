@@ -12,13 +12,16 @@ namespace BhlShopCart
 
         public Decimal Price(string[] items, IPriceList priceList)
         {
-            Decimal cost = 0.0M;
+            // prep for combined special pricing
+            priceList.Clear();
+
             var unique = items.Distinct();
             foreach (var u in unique)
             {
-                cost += priceList.Price(u, items.Where(x => x == u).Count());
+                priceList.Price(u, items.Where(x => x == u).Count());
             }
-            return cost;
+
+            return priceList.GetPrice();
         }
     }
 }
