@@ -9,6 +9,7 @@ namespace BhlShopCart
     public interface IPriceList
     {
         Decimal Price(string itemName, int qty);
+        Decimal PriceNotCombined(string itemName, int qty);
         Decimal GetPrice();
         void AddItem(string name, Decimal price);
         void AddSpecial(string name, int qty, int fr);

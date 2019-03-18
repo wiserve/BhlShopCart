@@ -8,6 +8,6 @@ namespace BhlShopCart
 {
     public interface IShopCart
     {
-        Decimal Price(string[] items, IPriceList priceList);
+        Decimal Price(string[] items, IPriceList priceList, bool isCombineSameOffer);
     }
 }

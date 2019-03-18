@@ -10,7 +10,7 @@ namespace BhlShopCart
     {
         //protected Dictionary<string, Decimal> PriceList = new Dictionary<string, decimal>() { { "APPLE", 0.45M }, { "ORANGE", 0.65M } };
 
-        public Decimal Price(string[] items, IPriceList priceList)
+        public Decimal Price(string[] items, IPriceList priceList, bool isCombineSameOffer=true)
         {
             // prep for combined special pricing
             priceList.Clear();
@@ -18,7 +18,10 @@ namespace BhlShopCart
             var unique = items.Distinct();
             foreach (var u in unique)
             {
-                priceList.Price(u, items.Where(x => x == u).Count());
+                if (isCombineSameOffer)
+                    priceList.Price(u, items.Where(x => x == u).Count());
+                else
+                    priceList.PriceNotCombined(u, items.Where(x => x == u).Count());
             }
 
             return priceList.GetPrice();

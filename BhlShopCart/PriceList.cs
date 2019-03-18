@@ -10,20 +10,27 @@ namespace BhlShopCart
     {
         public Dictionary<string, IItem> Items = new Dictionary<string, IItem>();
         public Dictionary<string, ISpecial> Specials = new Dictionary<string, ISpecial>();
+        protected Decimal Total = 0.0M;
+        protected Dictionary<string, List<Decimal>> specLists = new Dictionary<string, List<Decimal>>();
 
-        // this was the original price method, it was based on special connected to item rather than offer
-        //public Decimal Price(string itemName, int qty)
-        //{
-        //    if (!Items.ContainsKey(itemName.ToUpper())) throw new Exception(String.Format("Item '{0}' is not a valid item.", itemName));
+        // the not-combined offer pricing method, prices each item independently, WILL NOT HANDLE COMBINED SPECIAL OFFERS
+        public Decimal PriceNotCombined(string itemName, int qty)
+        {
+            if (!Items.ContainsKey(itemName.ToUpper())) throw new Exception(String.Format("Item '{0}' is not a valid item.", itemName));
 
-        //    Decimal prc = Items[itemName.ToUpper()].Price;
-        //    if (Specials.ContainsKey(itemName.ToUpper()))
-        //    {
-        //        ISpecial spec = Specials[itemName.ToUpper()];
-        //        return (prc * spec.For * (int)(qty / spec.Quantity)) + (prc * (int)(qty % spec.Quantity));
-        //    }
-        //    return qty * Items[itemName.ToUpper()].Price;
-        //}
+            IItem item = Items[itemName.ToUpper()];
+            Decimal prc = item.Price;
+            string specCode = item.SpecialCode?.ToUpper();
+            if (!String.IsNullOrEmpty(specCode) && Specials.ContainsKey(specCode))
+            {
+                ISpecial spec = Specials[specCode];
+                Total += (prc * spec.For * (int)(qty / spec.Quantity)) + (prc * (int)(qty % spec.Quantity));
+                return -1.0M;
+            }
+
+            // no special offer, just regular price
+            return qty * prc;
+        }
 
         public Decimal Price(string itemName, int qty)
         {
@@ -34,17 +41,78 @@ namespace BhlShopCart
             string specCode = Items[itemUC].SpecialCode?.ToUpper();
             if (!String.IsNullOrEmpty(specCode) && Specials.ContainsKey(specCode))
             {
-                ISpecial spec = Specials[specCode];
-                return (prc * spec.For * (int)(qty / spec.Quantity)) + (prc * (int)(qty % spec.Quantity));
+                if (!specLists.ContainsKey(specCode)) specLists[specCode] = new List<Decimal>();
+                List<Decimal> work = specLists[specCode];
+                for (int i = 0; i < qty; i++)
+                    work.Add(prc);
+                return -1.0M;
             }
-            return qty * Items[itemUC].Price;
+
+            // this is not a special, just price this item
+            Total += qty * Items[itemUC].Price;
+            return -1.0M;   // this is nothing
         }
 
+        // GetPrice() calculates and retrieves the final price
         public Decimal GetPrice()
         {
-            // this isn't needed
-            return 0.0M;
+            // go through all special collections
+            foreach (var sc in specLists)
+            {
+                ISpecial spec = Specials[sc.Key];
+                List<Decimal> sorted = sc.Value.OrderByDescending(x => x).ToList();
+
+                int len = sorted.Count();
+                int payFor = 0;
+                int free = 0;
+                for (int i = 0; i < len;)
+                {
+                    if (payFor < spec.For)
+                    {
+                        Total += sorted[i];
+                        payFor++;
+                        i++;
+                    }
+                    else
+                    {
+                        if (free < spec.Quantity - spec.For)
+                        {
+                            len--;      // the cheapest one is free
+                            free++;
+                        }
+                        else
+                        {
+                            // we have given away the free ones, now they need to buy again
+                            payFor = free = 0;
+                        }
+                    }
+                }
+            }
+
+            // we have the total price now
+            return Total;
         }
+
+        //public Decimal Price(string itemName, int qty, bool isCombineSameOffer=true)
+        //{
+        //    string itemUC = itemName.ToUpper();
+        //    if (!Items.ContainsKey(itemUC)) throw new Exception(String.Format("Item '{0}' is not a valid item.", itemName));
+
+        //    Decimal prc = Items[itemName.ToUpper()].Price;
+        //    string specCode = Items[itemUC].SpecialCode?.ToUpper();
+        //    if (!String.IsNullOrEmpty(specCode) && Specials.ContainsKey(specCode))
+        //    {
+        //        ISpecial spec = Specials[specCode];
+        //        return (prc * spec.For * (int)(qty / spec.Quantity)) + (prc * (int)(qty % spec.Quantity));
+        //    }
+        //    return qty * Items[itemUC].Price;
+        //}
+
+        //public Decimal GetPrice()
+        //{
+        //    // this isn't needed
+        //    return 0.0M;
+        //}
 
         public void AddItem(string name, Decimal price)
         {
@@ -69,6 +137,10 @@ namespace BhlShopCart
             return true;
         }
 
-        public void Clear() { }
+        public void Clear()
+        {
+            Total = 0.0M;
+            specLists.Clear();
+        }
     }
 }

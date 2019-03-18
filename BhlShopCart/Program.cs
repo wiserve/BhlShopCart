@@ -20,6 +20,7 @@ namespace BhlShopCart
         protected string[] listABOBBMO = { "Apple", "Banana", "Orange", "Banana", "Banana", "Melon", "Orange" };
         protected string[] listABOBBMOOMM = { "Apple", "Banana", "Orange", "Banana", "Banana", "Melon", "Orange", "Orange", "Melon", "Melon" };
         protected string[] listOOOOMM = { "Orange", "Orange", "Orange", "Orange", "Melon", "Melon" };
+        protected string[] listBBAA = new string[] { "Banana", "Banana", "Apple", "Apple" };
 
         protected int errors = 0;
 
@@ -31,7 +32,7 @@ namespace BhlShopCart
 
         public void Process()
         {
-            CombinedPriceList plist = new CombinedPriceList();
+            PriceList plist = new PriceList();
             plist.AddItem("Apple", 0.45M);
             plist.AddItem("Orange", 0.65M);
 
@@ -96,6 +97,34 @@ namespace BhlShopCart
                     Console.WriteLine("{0:C} for {1}", scrt.Price(item, plist), scrt.DisplayList());
                 }
                 Console.WriteLine("Completed step 5 testing.");
+
+                // stretch tests, part 1 - show evidence that a cheaper price can be gotten for two trips 
+                // to the checkout instead of a single one with the same items
+                Console.WriteLine();
+                Console.WriteLine();
+
+                scrt.Clear();
+                Decimal trip1 = scrt.Price(new string[] { "Banana", "Banana" }, plist);
+                Console.WriteLine("Trip 1 Total: {0:C} for {1}.", trip1, scrt.DisplayList());
+                scrt.Clear();
+                Decimal trip2 = scrt.Price(new string[] { "Apple", "Apple" }, plist);
+                Console.WriteLine("Trip 2 Total: {0:C} for {1}.", trip2, scrt.DisplayList());
+                Console.WriteLine("Total for 4 items: {0:C}", trip1 + trip2);
+                if (1.05M != trip1 + trip2)
+                    ErrorDetected("Failed pricing step stretch step 1");
+
+                scrt.Clear();
+                trip1 = scrt.Price(listBBAA, plist);
+                Console.WriteLine("Single Trip Total: {0:C} for {1}.", trip1, scrt.DisplayList());
+                if (1.2M != trip1)
+                    ErrorDetected("Failed pricing step stretch step 2");
+
+                scrt.Clear();
+                trip1 = scrt.Price(listBBAA, plist, false);
+                Console.WriteLine("Single Trip (not combined offer) Total: {0:C} for {1}.", trip1, scrt.DisplayList());
+                if (1.05M != trip1)
+                    ErrorDetected("Failed pricing step stretch step 3");
+                Console.WriteLine("Completed stretch step testing.");
             }
             catch (Exception ex)
             {
