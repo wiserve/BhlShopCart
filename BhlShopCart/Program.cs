@@ -17,6 +17,9 @@ namespace BhlShopCart
         protected string[] listABOB = { "Apple", "Banana", "Orange", "Banana" };
         protected string[] listABOBA = { "Apple", "Banana", "Orange", "Banana", "Apple" };
         protected string[] listABOBB = { "Apple", "Banana", "Orange", "Banana", "Banana" };
+        protected string[] listABOBBMO = { "Apple", "Banana", "Orange", "Banana", "Banana", "Melon", "Orange" };
+        protected string[] listABOBBMOOMM = { "Apple", "Banana", "Orange", "Banana", "Banana", "Melon", "Orange", "Orange", "Melon", "Melon" };
+        protected string[] listOOOOMM = { "Orange", "Orange", "Orange", "Orange", "Melon", "Melon" };
 
         protected int errors = 0;
 
@@ -73,6 +76,19 @@ namespace BhlShopCart
                 if (1.85M != sc.Price(listABOBA, plist))
                     ErrorDetected("Failed pricing step 3.4");
                 Console.WriteLine("Completed step 3 testing.");
+
+                // step 4 tests, added melon with separate 3for2 offer
+                plist.AddItem("melon", 1.0M);
+                plist.AddSpecial("3for2m", 3, 2);
+                plist.SetSpecial("melon", "3for2m");
+                if (3.5M != sc.Price(listABOBBMO, plist))
+                    ErrorDetected("Failed pricing step 4.1");
+                if (4.5M != sc.Price(listABOBBMOOMM, plist))
+                    ErrorDetected("Failed pricing step 4.2");
+                if (3.95M != sc.Price(listOOOOMM, plist))
+                    ErrorDetected("Failed pricing step 4.3");
+                Console.WriteLine("Completed step 4 testing.");
+                
             }
             catch (Exception ex)
             {
