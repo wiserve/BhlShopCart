@@ -88,7 +88,14 @@ namespace BhlShopCart
                 if (3.95M != sc.Price(listOOOOMM, plist))
                     ErrorDetected("Failed pricing step 4.3");
                 Console.WriteLine("Completed step 4 testing.");
-                
+
+                // step 5 tests, need to do a real-time, running total of checkout
+                ShopCartRT scrt = new ShopCartRT();
+                foreach (string item in listABOBBMOOMM)
+                {
+                    Console.WriteLine("{0:C} for {1}", scrt.Price(item, plist), scrt.DisplayList());
+                }
+                Console.WriteLine("Completed step 5 testing.");
             }
             catch (Exception ex)
             {
